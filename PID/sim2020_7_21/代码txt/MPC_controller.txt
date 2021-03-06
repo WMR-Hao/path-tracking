@@ -1,0 +1,131 @@
+function u_out  = my_MPC_controller(ref_pos, ref_vel, statu, u_out)
+
+% 程序上没有问题，在运动学模型上是可以完成任务的
+% 最近修改时间：7.25 
+% 基于运动学模型的MPC控制器
+% u_out=[vx ;  omega]
+% ref_vel=[xr yr alphar vr omegar]
+% e = [ex ey ealpha]
+
+Nc= 10; Np=20; %预测时域Np	控制时域Nc
+T=0.05; 
+
+% 测试是否能得到
+%    statu=[2; -2; pi/2; 0.001; 0.001; 0.001];
+%    u_out=[0; 0];
+%    ref_pos=[0;0;pi/4]; ref_vel=[2; 0; 0];  
+%% 底盘参数
+d = 0.18;	l = 0.16;	m = 24;	Iz = 11.89;	c = 513.6; %轮胎侧偏刚度
+
+%% 状态量                                                                           
+x = statu(1);   y = statu(2);  alpha = statu(3); 
+vx = statu(4);  vy = statu(5);    omega = statu(6);
+                                      
+                                                                            
+xr=ref_pos(1);  yr=ref_pos(2);  alphar=ref_pos(3);
+vxr=ref_vel(1); vyr=ref_vel(2); omegar=ref_vel(3);
+                                                                                      
+%控制量个数Nu
+Nu=size(u_out,1);
+
+%状态量个数Nx
+statu_error=[x-xr;   y-yr;   alpha-alphar;]; 
+Nx=size(statu_error,1);
+
+% 控制矩阵求解(将连续矩阵转换为离散矩阵，采用近似算法  A=I+T*A(t),B=T*B(t))
+% 此处：delta_X=AX+BU ————X=[a-r]=[X_I-Xr;Y_I-Yr;ALPHA_I-ALPHAr]statu_e=A*statu_e+B*u_e   %离散后的模型
+    % OUT=delta_X=a-r
+A=[ 1 0 -vx*sin(alphar)*T; 0 1 vx*cos(alphar)*T; 0 0 1];
+B=[cos(alphar)*T 0 ; sin(alphar)*T 0 ; 0 T];
+
+C = eye(Nx);
+
+Error = C * statu_error; % 误差
+
+% e_pos=Error(1:Nx/2); %位置误差
+
+% 得到新的X=A_new*X+B_new*delta_u   X=[X;u-ur]
+A_new = [A B;zeros(Nu,Nx) eye(Nu)];
+B_new = [B;eye(Nu)];
+C_new = [C,zeros(Nx,Nu)];
+%% 
+ur=[vxr; omegar];
+
+statu_new = [Error;u_out-ur];
+
+PHI=zeros(Np*size(C_new*A_new,1),size(A_new,2));
+for i=1:1:Np
+    PHI( Nx*i-(Nx-1):Nx*i  ,:)=C_new*A_new^i;
+end
+
+THETA=zeros( Np*size(C_new*B_new,1),  Nc*size(C_new*A_new*B_new ,2) );
+for i=1:1:Np
+    for j=1:1:Nc
+        if j<= i
+            THETA( Nx*(i-1)+1:Nx*i,Nu*j-1:Nu*j )= C_new*A_new^(i-j)*B_new;
+        else
+            THETA( Nx*(i-1)+1:Nx*i,Nu*j-1:Nu*j ) = zeros( Nx,Nu );
+        end
+    end
+end
+
+
+q = [1 0 0;
+     0 1 0;
+     0 0 1;];
+Q=zeros(Nx*Np,Nx*Np);
+for i=1:Np
+    for j=1:Np
+        if i==j
+            Q(Nx*(i-1)+1:Nx*i , Nx*(i-1)+1:Nx*i) = q;
+        end
+    end
+end
+
+R = 1*eye( Nc*Nu,Nc*Nu);
+
+%% 二次型
+p=5;
+
+H = [2*THETA'*Q*THETA+R zeros(Nc*Nu,1);zeros(1,Nc*Nu) p];  %不是对称的 % 前面加了个2
+
+ERROR =PHI*statu_new;  
+G = [2*ERROR'*Q*THETA zeros(1)];
+P_T = ERROR'*Q*ERROR;
+
+%% 约束条件
+%控制量约束
+M=tril(ones(Nc));
+Im= eye(Nu);
+A=kron(M,Im); % U=A*DELTA_U+Ut  中的A
+
+Ut=kron(ones(Nc,1),u_out); %Ut
+
+umin=[-5;-2];  %维数与控制变量的个数相同
+umax=[ 5; 2];
+Umin=kron(ones(Nc,1),umin);
+Umax=kron(ones(Nc,1),umax);
+a = [A zeros(Nu*Nc,1);-A zeros(Nu*Nc,1)];
+b = [Umax-Ut;-Umin+Ut];
+
+ % 状态增量约束
+delta_u_range=2;
+delta_Umin = kron((-delta_u_range)*ones(Nu,1),ones(Nc,1)); %速度增量约束
+delta_Umax = kron( (delta_u_range)*ones(Nu,1),ones(Nc,1));
+
+lb=[delta_Umin;-10];%（求解方程）状态量下界，包含控制时域内控制增量和松弛因子
+ub=[delta_Umax;10];%（求解方程）状态量上界，包含控制时域内控制增量和松弛因子
+  
+%%
+coder.extrinsic('quadprog');
+coder.extrinsic('tic');
+coder.extrinsic('toc');
+tic 
+[DELTA_U,fval]=quadprog(H,G,a,b,[],[],lb,ub);
+toc
+% DELTA_U=quadprog(H,G,[],[],[],[],lb,ub)
+delta_u = zeros(Nu*Nc+1,1);	% 定义类型，存储DELTA_U的mxarray类型数据
+delta_u = DELTA_U;
+delta_uout = delta_u(1:2)
+u_out = delta_uout+u_out
+

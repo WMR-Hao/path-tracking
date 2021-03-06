@@ -1,0 +1,18 @@
+function [ref_dot_q,ref_vel,ref_f] = fcn(ref_q)
+xr=ref_q(1);
+yr=ref_q(2);
+alphar=ref_q(3);
+
+vxr=1;
+vyr=0;
+omegar=0.5;
+
+ref_vel=[vxr;vyr;omegar];
+
+dotx = vxr*cos(alphar) - vyr*sin(alphar);
+doty = vxr*sin(alphar) + vyr*sin(alphar);
+dotalpha = omegar;
+ref_dot_q=[dotx;doty;dotalpha];
+
+ref_f = [0;0]
+end

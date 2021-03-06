@@ -1,0 +1,19 @@
+function [dot_statu, body_vel] = model(statu, vx ,omega)
+
+x = statu(1);
+y = statu(2);
+alpha = statu(3);
+
+dot_x = vx*cos(alpha);
+dot_y = vx*sin(alpha);
+dot_alpha = omega;
+
+
+
+% 状态【x y alpha vx vy omega】
+dot_statu = [dot_x; dot_y; dot_alpha];
+vy=0;
+body_vel=[vx;vy; omega]
+
+
+end
