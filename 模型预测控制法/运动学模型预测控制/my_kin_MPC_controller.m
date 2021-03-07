@@ -45,11 +45,12 @@ Nx=size(statu_x,1);
    
 %  V=R_B2I*omega2vel*u;%运动学模型
 %%
+vyr= 0;
 % 控制矩阵求解(将连续矩阵转换为离散矩阵，采用近似算法  A=I+T*A(t),B=T*B(t))
 % 此处：delta_X=AX+BU ————X=[a-r]=[X_I-Xr;Y_I-Yr;ALPHA_I-ALPHAr]statu_e=A*statu_e+B*u_e   %离散后的模型
     % OUT=delta_X=a-r
-A=[ 1, 0,  (-vx*sin(PSIr)-vy*cos(PSIr))*dt;
-    0, 1,   (vx*cos(PSIr)-vy*sin(PSIr))*dt;
+A=[ 1, 0,  (-vxr*sin(PSIr)-vyr*cos(PSIr))*dt;
+    0, 1,   (vxr*cos(PSIr)-vyr*sin(PSIr))*dt;
     0, 0,  1]; 
 
 B=[ dt*cos(PSIr) 0;
