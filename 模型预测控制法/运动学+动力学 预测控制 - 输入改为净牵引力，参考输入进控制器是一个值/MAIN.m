@@ -7,7 +7,7 @@ clear all
 %% 初始化
 dt = 0.032 ;    T = 32*3*1*0.7 ;   t = 0:dt:T;
 X = 1 ;   Y = 0;    PSI = pi/2;  % 初始位置    [1 0 pi/4];
-vx = 0.1;  vy = 0;    gamma=0;
+vx = 0.5;  vy = 0;    gamma=0;
 alpha=deg2rad(0);
 
 wheel_r = 0.11;
@@ -38,16 +38,14 @@ fprintf(control_U, "time  , u_vx  , u_omega  \n");
 fclose(control_U);
 
 %% 参考轨迹部分
-tref = 0:dt:T+50;
-ref_position=zeros(length(tref),3);
+ref_position=zeros(length(t),3);
 ref_position(1,:)=[0 0 pi/4];
 vxr=1;
 vyr=0;
+% gammar=0.5;
 gammar=0;
-ref_velocity=zeros(length(tref),3);
-ref_velocity(1,:)=[vxr vyr gammar];
 
-for i=1:length(tref)
+for i=1:length(t)
     [Xr,Yr,ALPHAr] = ref_path(vxr,gammar,dt,ref_position(i,1),ref_position(i,2),ref_position(i,3));
     ref_position(i+1,1)=Xr;
     ref_position(i+1,2)=Yr;
@@ -85,13 +83,10 @@ for i=1:length(t)
     %% 控制器 计算
     %tic
 %     %************************   控制器部分  *************************
-%       u_out = my_dyn_MPC_controller...
-%           (body_pos(i,:),body_vel(i,:),ref_position(i+1,:),ref_velocity(i+1,:),Fa,Fb,dt,alpha);
-         u_out = my_dyn_MPC_controller...
-          (body_pos(i,:),body_vel(i,:),ref_position(i+1:end,:),ref_velocity(i+1:end,:),Fa,Fb,dt,alpha)
+      u_out = my_dyn_MPC_controller...
+          (body_pos(i,:),body_vel(i,:),ref_position(i+1,:),ref_velocity(i+1,:),Fa,Fb,dt,alpha);
+      % 参考轨迹输入到控制器为一个值
  
-      
-      
     Fa=u_out(1);
     Fb=u_out(2);
 %     Ta=Taa(i);
@@ -107,7 +102,7 @@ error_pos(i,2) = Y - ref_position(i+1,2);
 error_pos(i,3) = PSI - ref_position(i+1,3);
 
 error_vel(i,1) = vx - vxr;
-error_vel(i,2) = vy - vyr;
+error_vel(i,2) = vy - vy;
 error_vel(i,3) = gamma - gammar;
 
 % 记录车轮侧偏角
@@ -125,51 +120,46 @@ BETA_vector(i,:)=beta;
 % fprintf(control_U,'%.6f  ,  %.6f,  %.6f  \n',controller_u(i,:));
 % fclose(control_U);
 
-%% 
-
-
-
-% %     % 作出轨迹图像
-%     if i>2
-%         figure(10)
-%         plot([body_pos(i-1,1) body_pos(i,1)],[body_pos(i-1,2) body_pos(i,2)],'b.-'); %'black.-'  'red.-'
+% %% 
+%     % 作出轨迹图像
+    if i>2
+        figure(10)
+        plot([body_pos(i-1,1) body_pos(i,1)],[body_pos(i-1,2) body_pos(i,2)],'b.-'); %'black.-'  'red.-'
+        xlabel('X轴 m');
+        ylabel('Y轴 m');
+        title('轨迹图');
+        axis equal
+        hold on
+        
+% %         figure(11)
+%         plot([t(i-1) t(i)],[body_vel(i-1,1) body_vel(i,1)],'black.-',...
+%              [t(i-1) t(i)],[body_vel(i-1,2) body_vel(i,2)],'red.-',...
+%              [t(i-1) t(i)],[body_vel(i-1,3) body_vel(i,3)],'green.-'); %'black.-'  'red.-'
 %         xlabel('X轴 m');
 %         ylabel('Y轴 m');
-%         title('轨迹图');
-%         axis equal
+%         title('速度图');
+%         legend('纵向速度','横向速度','转动角速度');
+%         hold on
+% 
+% %         figure(2) %位姿误差 
+%         plot( [t(i-1) t(i)], [error_pos(i-1,1) error_pos(i,1)],'blue.-',...
+%               [t(i-1) t(i)], [error_pos(i-1,2) error_pos(i,2)],'red.-',...
+%               [t(i-1) t(i)], [error_pos(i-1,3) error_pos(i,3)],'green.-');
 %         hold on
 %         
-% % %         figure(11)
-% %         plot([t(i-1) t(i)],[body_vel(i-1,1) body_vel(i,1)],'black.-',...
-% %              [t(i-1) t(i)],[body_vel(i-1,2) body_vel(i,2)],'red.-',...
-% %              [t(i-1) t(i)],[body_vel(i-1,3) body_vel(i,3)],'green.-'); %'black.-'  'red.-'
-% %         xlabel('X轴 m');
-% %         ylabel('Y轴 m');
-% %         title('速度图');
-% %         legend('纵向速度','横向速度','转动角速度');
-% %         hold on
-% % 
-% % %         figure(2) %位姿误差 
-% %         plot( [t(i-1) t(i)], [error_pos(i-1,1) error_pos(i,1)],'blue.-',...
-% %               [t(i-1) t(i)], [error_pos(i-1,2) error_pos(i,2)],'red.-',...
-% %               [t(i-1) t(i)], [error_pos(i-1,3) error_pos(i,3)],'green.-');
-% %         hold on
-% %         
-% %         figure(3) % 速度误差
-% %         plot( [t(i-1) t(i)], [error_vel(i-1,1) error_vel(i,1)],'blue.-',...
-% %               [t(i-1) t(i)], [error_vel(i-1,2) error_vel(i,2)],'red.-',...
-% %               [t(i-1) t(i)], [error_vel(i-1,3) error_vel(i,3)],'green.-');
-% %         hold on
-% %  
-%     end
-%     
-  
-%     drawnow 
-
-
-% % %%  
+%         figure(3) % 速度误差
+%         plot( [t(i-1) t(i)], [error_vel(i-1,1) error_vel(i,1)],'blue.-',...
+%               [t(i-1) t(i)], [error_vel(i-1,2) error_vel(i,2)],'red.-',...
+%               [t(i-1) t(i)], [error_vel(i-1,3) error_vel(i,3)],'green.-');
+%         hold on
+%  
+    end
     
-    i
+  i;
+    drawnow 
+% %%  
+    
+    
 end
 
 %% 分析结果用：
@@ -211,7 +201,7 @@ hold on
 
 figure(15)   % 速度图
 subplot(2,1,1)
-plot(t,body_vel(:,1),'.-',tref,ref_velocity(2:end,1),'r-');
+plot(t,body_vel(:,1),'.-',t,ref_velocity(2:end,1),'r-');
 xlabel('X轴');
 ylabel('Y轴');
 title('机器人速度 '); 
@@ -219,7 +209,7 @@ legend('实际前进速度','参考前进速度');
 hold on
 
 subplot(2,1,2)
-plot(t,body_vel(:,3),'.-',tref,ref_velocity(2:end,3),'r-');
+plot(t,body_vel(:,3),'.-',t,ref_velocity(2:end,3),'r-');
 xlabel('X轴');
 ylabel('Y轴');
 title('机器人速度 '); 

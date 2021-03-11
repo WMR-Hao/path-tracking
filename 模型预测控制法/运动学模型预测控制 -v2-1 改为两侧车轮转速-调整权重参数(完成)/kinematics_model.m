@@ -1,3 +1,4 @@
+%  function [X,Y,PSI,vx,gamma]=kinematics_model(vx,gamma,X,Y,PSI,dt)
 function [Xnext,Ynext,PSInext,vx,gamma]=kinematics_model(vx,gamma,X,Y,PSI,dt)
     %运动学模型u=[vx omega]
 %% 侧滑用vy表示

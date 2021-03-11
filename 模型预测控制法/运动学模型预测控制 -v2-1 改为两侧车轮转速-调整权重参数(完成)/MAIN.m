@@ -4,10 +4,10 @@ clc
 clear all
 
 %% 初始化
-dt=0.032;    T=160;  
+dt=0.032;    T=40;  
 t=0:dt:T;
-X=0 ;   Y=-10;    PSI=deg2rad(0);  % 初始位置
-vx=0.1;      gamma=0.1;        vy=0;
+X=0 ;   Y = 0.5;    PSI=deg2rad(0);  % 初始位置
+vx=0.01;      gamma=0.1;        vy=0;
 
 wheel_r = 0.11;
 
@@ -35,11 +35,11 @@ ref_position=zeros(length(tref),3);
 ref_position(1,:)=[0 0 pi/4];
 vyr=0;
 
-% vxr=1*cos(tref);
-% gammar=1*sin(tref);
-vxr=0.5*ones(size(tref));
-gammar=0*ones(size(tref));
-% gammar=0.5;
+% vxr=0.5*cos(tref);
+% gammar=0.5*sin(tref);
+ vxr=0.5*ones(size(tref));
+ gammar=0.5*ones(size(tref));
+
 
 for i=1:length(tref)
     [Xr,Yr,ALPHAr] = ref_path...
@@ -49,9 +49,9 @@ for i=1:length(tref)
     ref_position(i+1,3)=ALPHAr;
 end
 
-% figure(1)   % 位置图
-% plot(ref_position(:,1),ref_position(:,2),'r-');
-% hold on
+figure(1)   % 位置图
+plot(ref_position(:,1),ref_position(:,2),'r-');
+hold on
 
 %% 存储位姿数据和速度数据
 body_pos=zeros(length(t),3);

@@ -5,7 +5,7 @@
 
 function [u_out]=my_kin_MPC_controller_v2(body_pos,body_vel,ref_position,vxr,vyr,gammar,dt)
 %  预测时域Np	控制时域Nc
-Nc = 5 ; 
+Nc = 15 ; 
 Np = 30 ;
      
 body_pos = double(body_pos);    ref_position = double(ref_position);
@@ -66,11 +66,8 @@ B_cell=cell(Np,Nc);
 A_=cell2mat(A_cell);
 B_=cell2mat(B_cell);
 
-% q = 75*[1 0 0 ;
-%         0 1 0 ;
-%         0 0 1];
-    q =[100 0 0 ;
-        0 100 0 ;
+q =    [50 0 0 ;
+        0 50 0 ;
         0 0 25];
 Q_cell = cell(Np,Np);
 for i=1:1:Np
@@ -110,7 +107,6 @@ ub = Umax-Ur;  %（求解方程）状态量上界，包含控制时域内控制增量和松弛因子
     
 [U,fval]=quadprog(H,f,[],[],[],[],lb,ub);
 
-% u_out=U(end-1:end)+ur;
 u_out=U(1:2)+ur;
 
 

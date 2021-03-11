@@ -1,6 +1,6 @@
 function [Xnext,Ynext,PSInext,vxnext,vynext,gammanext,BETA]=dynamics_model...
     (Fa,Fb,X,Y,PSI,vx,vy,gamma,dt,alpha)
-%%   动力学模型u=[Ta Tb] 后面是运动学
+%%   动力学模型u=[FDPL FDPR] 后面是运动学
 
 %% 机器人参数
 wheel_r = 0.11;

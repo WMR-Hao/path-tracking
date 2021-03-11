@@ -6,7 +6,7 @@ clear all
 %% 初始化
 dt=0.05;    T=20;  
 t=0:dt:T;
-X=0.5 ;   Y=-1;    PSI=deg2rad(90);  % 初始位置
+X=1 ;   Y=-1;    PSI=deg2rad(0);  % 初始位置
 vx=0.1;      gamma=0.1;        vy=0;
 
 wheel_r = 0.11;
@@ -31,11 +31,11 @@ fclose(control_U);
 
 %% 参考轨迹部分
 ref_position=zeros(length(t),3);
-ref_position(1,:)=[1 0 0];
+ref_position(1,:)=[0 0 pi/3];
 vxr=1;
 vyr=0;
 % gammar=0.5;
-gammar=0;
+gammar=0.5;
 
 for i=1:length(t)
     [Xr,Yr,ALPHAr] = ref_path(vxr,gammar,dt,ref_position(i,1),ref_position(i,2),ref_position(i,3));
@@ -74,26 +74,15 @@ for i=1:length(t)
 %     %************************   控制器部分  *************************
      u_out = my_kin_MPC_controller(body_pos(i,:),body_vel(i,:),ref_position(i,:),vxr,gammar,dt);
 
-    uu(i,:)=u_out';
-
+% u_out=back_stepping(body_pos(i,1),ref_position(i+1,1),body_pos(i,2),ref_position(i+1,2),body_pos(i,3),ref_position(i+1,3),vxr,gammar);
     vx=u_out(1);
     gamma=u_out(2);
 %   *********   控制器结束 end
     %toc
-%     u(i,1)=vx;
-%     u(i,2)=gamma;
-% vx=vx1(i);
-% gamma=gamma1(i);
-%     [omega_l,omega_r] = velocity_resolution(vx,omega);  % 将[v  w]->[wl wr]
-%     omega_wheel=[omega_l  omega_r];
-%     omega_wheel=limitvel(omega_wheel,omega_max); % 根据机器人实际情况，将omega 限幅
-%     omega_l=omega_wheel(1);    omega_r=omega_wheel(2) ;
-%     u(i,3)=omega_l;    u(i,4)=omega_r;   
 
 %% 执行器赋值    模拟机器人运动
     [X,Y,PSI,vx,gamma]=kinematics_model(vx,gamma,X,Y,PSI,dt);
-%     [X,Y,ALPHA,vx,vy,gamma]=dynamics_model(Ta,Tb,X,Y,ALPHA,vx,vy,gamma,dt,alpha);
-
+    
 %%  计算误差
 error_pos(i,1) = X - ref_position(i,1);
 error_pos(i,2) = Y - ref_position(i,2);
@@ -103,18 +92,6 @@ error_vel(i,1) = vx - vxr;
 error_vel(i,2) = vy - vyr;
 error_vel(i,3) = gamma - gammar;
 
-%% 存储数据至simdata文件
-% ERROR = fopen('error.txt','a');
-% fprintf(ERROR,'%.6f  ,  %.6f,  %.6f,  %.6f,  %.6f,  %.6f,  %.6f\n',error(i,:));
-% fclose(ERROR);  
-
-% Pos_Vel = fopen('pos_vel.txt','a');
-% fprintf(Pos_Vel,'%.6f  ,  %.6f,  %.6f,  %.6f,  %.6f,  %.6f,  %.6f,  %.6f,  %.6f,  %.6f,  %.6f,  %.6f,  %.6f\n',pos_vel(i,:));
-% fclose(Pos_Vel);  
-
-% control_U = fopen('controller_u.txt','a');
-% fprintf(control_U,'%.6f  ,  %.6f,  %.6f  \n',controller_u(i,:));
-% fclose(control_U);
 
 %% 作出轨迹图像
     if i>2
@@ -137,31 +114,30 @@ error_vel(i,3) = gamma - gammar;
 %  
     end
     drawnow
-%     i;
 end
 
 %% 分析结果用：
 % %% 画图
 
-        figure(2) %位姿误差 
-        plot( t, error_pos(:,1),'blue.-',...
-              t, error_pos(:,2),'red.-',...
-              t, error_pos(:,3),'green.-');
-        hold on
-        xlabel('时间 t');
-        ylabel('位姿 ');
-        legend('x误差','y向误差','角度误差');
-        title('位姿误差图');
-        
-        figure(3) % 速度误差
-        plot( t, error_vel(:,1),'blue.-',...
-              t, error_vel(:,2),'red.-',...
-              t, error_vel(:,3),'green.-');
-        hold on
-        legend('纵向速度误差','横向速度误差','转动角速度误差');
-        xlabel('时间 t');
-        ylabel('速度  ');
-        title('速度误差图');
+figure(2) %位姿误差
+plot( t, error_pos(:,1),'blue.-',...
+    t, error_pos(:,2),'red.-',...
+    t, error_pos(:,3),'green.-');
+hold on
+xlabel('时间 t');
+ylabel('位姿 ');
+legend('x误差','y向误差','角度误差');
+title('位姿误差图');
+
+figure(3) % 速度误差
+plot( t, error_vel(:,1),'blue.-',...
+    t, error_vel(:,2),'red.-',...
+    t, error_vel(:,3),'green.-');
+hold on
+legend('纵向速度误差','横向速度误差','转动角速度误差');
+xlabel('时间 t');
+ylabel('速度  ');
+title('速度误差图');
 
 
 
@@ -174,6 +150,17 @@ title('机器人路径 ');
 legend('实际位置','参考位置');
 hold on
 axis equal
+
+figure(5)   % 位置图
+% subplot(2,2,1)
+plot(t, body_pos(:,3),'blue.-');
+xlabel('X轴');
+ylabel('Y轴');
+title('机器人路径 ');
+legend('实际位置');
+hold on
+axis equal
+
 
 
 

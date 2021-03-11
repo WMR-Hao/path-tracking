@@ -1,6 +1,6 @@
 % 最近修改时间：3.1
 % 基于运动学模型的MPC控制器
-% u=[vel_l ; vel_r]
+% u=[vx ; gamma]
 % ref=[xr yr alphar vr omegar]
 
 % function [u_out]=my_kin_MPC_controller(body_pos,ref_position,...
@@ -9,8 +9,8 @@
 
 function [u_out]=my_kin_MPC_controller(body_pos,body_vel,ref_position,vxr,gammar,dt)
 %  预测时域Np	控制时域Nc
-Nc = 35 ; 
-Np = 70;
+Nc = 10 ; 
+Np = 30;
      
 body_pos=double(body_pos);    ref_position=double(ref_position);
 body_vel=double(body_vel); 
@@ -82,7 +82,7 @@ THETA_cell=cell(Np,Nc);
 PHI=cell2mat(PHI_cell);
 THETA=cell2mat(THETA_cell);
 
-q = [1 0 0 ;
+q = 100*[1 0 0 ;
      0 1 0 ;
      0 0 1];
 Q_cell = cell(Np,Np);
@@ -100,12 +100,9 @@ Q = cell2mat( Q_cell );
 R = 1*eye(Nu*Nc,Nu*Nc);
 %% 二次型
 % J=(1/2)*X'HX+fX
-% p=5;
-% H = [THETA'*Q*THETA+R zeros(2*Nc,1);zeros(1,2*Nc) p];
+
 H = [2*THETA'*Q*THETA + 2*R];  % x'HX 项
 
-% error =PHI*statu_new;
-% f = [2*(PHI*statu_new)'*Q*THETA];
 f = [2*(PHI*statu_new)'*Q*THETA]'; % fX 项
 
 %% 约束条件
@@ -172,6 +169,8 @@ ub = [Umax];%（求解方程）状态量上界，包含控制时域内控制增量和松弛因子
 %     
 
 %%
+lb=[];
+ub=[];
 
 [U,fval]=quadprog(H,f,[],[],[],[],lb,ub);
 

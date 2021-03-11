@@ -3,7 +3,7 @@
 % u=[Ta ; Tb]
 % ref=[Xr Yr PSIr vxr xyr gammar]
 
-function [u_out]=my_dyn_MPC_controller(body_pos,body_vel,ref_position,ref_velocity,Ta_previous,Tb_previous,dt,alpha)
+function [u_out]=my_dyn_MPC_controller_v9_backup(body_pos,body_vel,ref_position,ref_velocity,Ta_previous,Tb_previous,dt,alpha)
 %    body_pos,body_vel              当前t时刻的位姿和速度。
 %    ref_position,ref_velocity      当前t时刻的参考位姿和参考速度。
 %    Ta,Tb                          前一时刻t-1时刻的输入。
@@ -133,7 +133,7 @@ for prediction_time=1:Np
     %%  常规，四驱，动力学模型  净牵引力情况
     vxtnext=( (Fat-m*g*sin(alpha)*sin(PSIt)+m*vyt*gammat)/m )*dt + vxt;
     vytnext=( (Fyt-m*g*sin(alpha)*cos(PSIt)-m*vxt*gammat)/m )*dt + vyt;
-    gammatnext=( d*( Fbt )+l*(-F1yt-F2yt+F3yt+F4yt)) /Iz;
+    gammatnext=( d*( Fbt )+l*(-F1yt-F2yt+F3yt+F4yt)) /Iz;   % **************************** 这里没加前一刻状态，
     
     % vynext=( (Fy-m*g*sin(alpha)*cos(PSI))/m )*dt + vy;  %-vx*gamma  向心力项
     % vxnext=( (Fa-m*g*sin(alpha)*sin(PSI))/m )*dt + vx;  %+vy*gamma
