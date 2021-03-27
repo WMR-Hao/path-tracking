@@ -31,11 +31,11 @@ Nu=size(ut,1);
 qt=[body_pos';body_vel'];    %µ±Ç°Ê±¿Ì t µÄ×´Ì¬Á¿¼°×´Ì¬Á¿¸öÊýNx
 Nx=size(qt,1);
 
-q = [100 0 0 0 0 0;
-         0 100 0 0 0 0;
-         0 0 10 0 0 0;
-         0 0 0 1 0 0;
-         0 0 0 0 0.1 0;
+q = [1 0 0 0 0 0;
+         0 1 0 0 0 0;
+         0 0 1 0 0 0;
+         0 0 0 10 0 0;
+         0 0 0 0 10 0;
          0 0 0 0 0 1;];
 R = 1*eye(Nu*Nc,Nu*Nc);
 row=1; % ËÉ³ÚÒò×Ó µÄÈ¨ÖØ
@@ -95,34 +95,34 @@ beta4t = ( vyt-l*gammat )/( vxt-d*gammat ) ;
     F2yt=-c_wheel*beta2t;
     F3yt=-c_wheel*beta3t;
     F4yt=-c_wheel*beta4t;
-      
-    if beta1t>=beta_max
-        F1yt=-c_wheel*beta_max;
-    end
-    if beta1t<=beta_min
-        F1yt=-c_wheel*beta_min;
-    end
-    %%
-    if beta2t>=beta_max
-        F2yt=-c_wheel*beta_max;
-    end
-    if beta2t<=beta_min
-        F2yt=-c_wheel*beta_min;
-    end
-    %%
-    if beta3t>=beta_max
-        F3yt=-c_wheel*beta_max;
-    end
-    if beta3t<=beta_min
-        F3yt=-c_wheel*beta_min;
-    end
-    %%
-    if beta4t>=beta_max
-        F4yt=-c_wheel*beta_max;
-    end
-    if beta4t<=beta_min
-        F4yt=-c_wheel*beta_min;
-    end
+%       
+%     if beta1t>=beta_max
+%         F1yt=-c_wheel*beta_max;
+%     end
+%     if beta1t<=beta_min
+%         F1yt=-c_wheel*beta_min;
+%     end
+%     %%
+%     if beta2t>=beta_max
+%         F2yt=-c_wheel*beta_max;
+%     end
+%     if beta2t<=beta_min
+%         F2yt=-c_wheel*beta_min;
+%     end
+%     %%
+%     if beta3t>=beta_max
+%         F3yt=-c_wheel*beta_max;
+%     end
+%     if beta3t<=beta_min
+%         F3yt=-c_wheel*beta_min;
+%     end
+%     %%
+%     if beta4t>=beta_max
+%         F4yt=-c_wheel*beta_max;
+%     end
+%     if beta4t<=beta_min
+%         F4yt=-c_wheel*beta_min;
+%     end
     
     Fyt=F1yt+F2yt+F3yt+F4yt;
 %%  ³µÂÖ¸ºÔØ
@@ -310,8 +310,8 @@ ub = [delta_Umax;p_max];%£¨Çó½â·½³Ì£©×´Ì¬Á¿ÉÏ½ç£¬°üº¬¿ØÖÆÊ±ÓòÄÚ¿ØÖÆÔöÁ¿ºÍËÉ³ÚÒò×
     end
     A_I = kron(A_t,eye(Nu)) ;
     Ut = kron(ones(Nc,1),ut) ;
-    umin=[-50;  -50];%Î¬ÊýÓë¿ØÖÆ±äÁ¿µÄ¸öÊýÏàÍ¬ Tamin Tbmin     -1.6667
-    umax=[ 50;   50];
+    umin=[-500;  -500];%Î¬ÊýÓë¿ØÖÆ±äÁ¿µÄ¸öÊýÏàÍ¬ Tamin Tbmin     -1.6667
+    umax=[ 500;   500];
     Umin=kron(ones(Nc,1),umin.*ones(Nu,1) ) ;
     Umax=kron(ones(Nc,1),umax.*ones(Nu,1) ) ;
  
@@ -394,6 +394,8 @@ b_cons2 = [ BETA_max - C_BETA_*PHI*q_ - C_BETA_ * GAMMA * phit - BETA_t + Cqt;
 A_cons = [A_cons1;A_cons2] ;
 
 b_cons = [b_cons1;b_cons2] ;
+A_cons = [];
+b_cons = [] ;
 
 Aeq=[];
 beq=[];

@@ -8,7 +8,7 @@ clear all
 dt = 0.032 ;    T = 32*1.5*1*0.7 ;    t = 0:dt:T;% T = 32*1*0.7 ;
 X = 1 ;   Y = 0;    PSI = pi/2;  % ≥ı ºŒª÷√    [1 0 pi/4];
 vx = 0.1;  vy = 0;    gamma=0;
-alpha=deg2rad(0);
+alpha=deg2rad(10);
 
 wheel_r = 0.11;
 gamma_max = 15;  % 6.4

@@ -4,9 +4,9 @@ clc
 clear all
 
 %% 初始化
-dt=0.05;    T=20;  
+dt=0.01;    T=20;  
 t=0:dt:T;
-X=1 ;   Y=-1;    PSI=deg2rad(0);  % 初始位置
+X=0 ;   Y=0;    PHI=deg2rad(pi/4);  % 初始位置
 vx=0.1;      gamma=0.1;        vy=0;
 
 wheel_r = 0.11;
@@ -31,7 +31,7 @@ fclose(control_U);
 
 %% 参考轨迹部分
 ref_position=zeros(length(t),3);
-ref_position(1,:)=[0 0 pi/3];
+ref_position(1,:)=[0 0 PHI];
 vxr=1;
 vyr=0;
 % gammar=0.5;
@@ -64,7 +64,7 @@ for i=1:length(t)
     %% 读传感器值
     body_pos(i,1)= X ;    % body_pos=[X Y PSI]
     body_pos(i,2)= Y ;
-    body_pos(i,3)= PSI ;
+    body_pos(i,3)= PHI ;
     body_vel(i,1)= vx ;   %body_vel=[vx vy gamma]
     body_vel(i,2)= vy ;
     body_vel(i,3)= gamma ;
@@ -81,38 +81,38 @@ for i=1:length(t)
     %toc
 
 %% 执行器赋值    模拟机器人运动
-    [X,Y,PSI,vx,gamma]=kinematics_model(vx,gamma,X,Y,PSI,dt);
+    [X,Y,PHI,vx,gamma]=kinematics_model(vx,gamma,X,Y,PHI,dt);
     
 %%  计算误差
 error_pos(i,1) = X - ref_position(i,1);
 error_pos(i,2) = Y - ref_position(i,2);
-error_pos(i,3) = PSI - ref_position(i,3);
+error_pos(i,3) = PHI - ref_position(i,3);
 
 error_vel(i,1) = vx - vxr;
 error_vel(i,2) = vy - vyr;
 error_vel(i,3) = gamma - gammar;
 
 
-%% 作出轨迹图像
-    if i>2
-        figure(1)
-        plot([body_pos(i-1,1) body_pos(i,1)],[body_pos(i-1,2) body_pos(i,2)],'m.-'); %'black.-'  'red.-'
-        axis equal
-        hold on
-
-%         figure(2) %位姿误差 
-%         plot( [t(i-1) t(i)], [error_pos(i-1,1) error_pos(i,1)],'blue.-',...
-%               [t(i-1) t(i)], [error_pos(i-1,2) error_pos(i,2)],'red.-',...
-%               [t(i-1) t(i)], [error_pos(i-1,3) error_pos(i,3)],'green.-');
+% %% 作出轨迹图像
+%     if i>2
+%         figure(1)
+%         plot([body_pos(i-1,1) body_pos(i,1)],[body_pos(i-1,2) body_pos(i,2)],'m.-'); %'black.-'  'red.-'
+%         axis equal
 %         hold on
-%         
-%         figure(3) % 速度误差
-%         plot( [t(i-1) t(i)], [error_vel(i-1,1) error_vel(i,1)],'blue.-',...
-%               [t(i-1) t(i)], [error_vel(i-1,2) error_vel(i,2)],'red.-',...
-%               [t(i-1) t(i)], [error_vel(i-1,3) error_vel(i,3)],'green.-');
-%         hold on
-%  
-    end
+% 
+% %         figure(2) %位姿误差 
+% %         plot( [t(i-1) t(i)], [error_pos(i-1,1) error_pos(i,1)],'blue.-',...
+% %               [t(i-1) t(i)], [error_pos(i-1,2) error_pos(i,2)],'red.-',...
+% %               [t(i-1) t(i)], [error_pos(i-1,3) error_pos(i,3)],'green.-');
+% %         hold on
+% %         
+% %         figure(3) % 速度误差
+% %         plot( [t(i-1) t(i)], [error_vel(i-1,1) error_vel(i,1)],'blue.-',...
+% %               [t(i-1) t(i)], [error_vel(i-1,2) error_vel(i,2)],'red.-',...
+% %               [t(i-1) t(i)], [error_vel(i-1,3) error_vel(i,3)],'green.-');
+% %         hold on
+% %  
+%     end
     drawnow
 end
 

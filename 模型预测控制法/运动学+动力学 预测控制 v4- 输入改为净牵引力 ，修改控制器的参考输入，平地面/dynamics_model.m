@@ -17,6 +17,8 @@ Iz = 0.14 ;  Ix = 2.8305 ;  Iy = 4.6786;
 H = 0.08;  % 质心高度，未知
 c_wheel = 10;
 
+% Iz = 1; 
+
 %% 车动力学模型
 % 侧偏角
 % beta1 = atan(( ( vy+l*gamma )/( vx-d*gamma ) ));    %beta1= ( vy+l*gamma )/( vx-d*gamma ) 

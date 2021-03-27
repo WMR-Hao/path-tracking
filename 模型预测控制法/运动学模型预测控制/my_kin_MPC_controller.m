@@ -82,8 +82,8 @@ THETA_cell=cell(Np,Nc);
 PHI=cell2mat(PHI_cell);
 THETA=cell2mat(THETA_cell);
 
-q = 100*[1 0 0 ;
-     0 1 0 ;
+q = [50 0 0 ;
+     0 50 0 ;
      0 0 1];
 Q_cell = cell(Np,Np);
 for i=1:1:Np
